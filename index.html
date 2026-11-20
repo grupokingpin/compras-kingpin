@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Órdenes de Compra | Grupo Kingpin</title>
+  <link rel="icon" href="https://drive.google.com/thumbnail?id=1Dxw9_Vu4zgAZcK8eCdStIi1ETx2IA-JK&sz=w200">
+  <style>
+    :root {
+      --bg-page: #F1F5F9;
+      --bg-card: #FFFFFF;
+      --border-light: #E2E8F0;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --brand-primary: #F05A28; /* Naranja Grupo Kingpin */
+      --brand-hover: #D94819;
+      --brand-soft: #FFF7ED;
+    }
+
+    body.tema-bolerama {
+      --brand-primary: #C8102E; /* Rojo Bolerama Coyoacán */
+      --brand-hover: #A50D26;
+      --brand-soft: #FEF2F2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg-page); color: var(--text-dark); padding-bottom: 95px; }
+
+    /* Pantalla de Login */
+    .login-wrapper {
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
+    }
+    .login-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 20px;
+      padding: 32px 24px; width: 100%; max-width: 400px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); text-align: center;
+    }
+    .login-logo { max-width: 190px; margin-bottom: 16px; }
+    .login-title { font-size: 22px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+
+    label { display: block; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+    select, input[type="password"], input[type="text"], input[type="number"], textarea {
+      width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--border-light);
+      background: #F8FAFC; color: var(--text-dark); font-size: 15px; font-weight: 500; margin-bottom: 16px; outline: none; transition: 0.2s;
+    }
+    select:focus, input:focus, textarea:focus { border-color: var(--brand-primary); background: #FFFFFF; box-shadow: 0 0 0 3px var(--brand-soft); }
+
+    .pin-input { text-align: center; font-size: 26px !important; letter-spacing: 10px; font-weight: 800 !important; }
+
+    .btn {
+      width: 100%; padding: 14px 18px; border-radius: 12px; border: none; background: var(--brand-primary);
+      color: #FFFFFF; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s;
+      display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn:hover { background: var(--brand-hover); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-secondary { background: #E2E8F0; color: var(--text-dark); box-shadow: none; }
+    .btn-secondary:hover { background: #CBD5E1; }
+    .btn-whatsapp { background: #22C55E; color: #FFFFFF; text-decoration: none; margin-top: 12px; }
+    .btn-drive { background: #2563EB; color: #FFFFFF; text-decoration: none; margin-top: 10px; }
+
+    /* Barra Superior App (Estilo luminoso y corporativo) */
+    .topbar {
+      background: #FFFFFF; border-bottom: 3px solid var(--brand-primary); padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-logo { height: 40px; object-fit: contain; }
+    .topbar-info h2 { font-size: 15px; font-weight: 800; color: var(--text-dark); }
+    .topbar-info p { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .btn-salir {
+      background: #F1F5F9; border: 1px solid var(--border-light); color: var(--text-dark);
+      padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+
+    /* Banner Sucursal */
+    .hero-banner {
+      background: var(--brand-primary); color: #FFFFFF; padding: 18px 16px 26px 16px;
+      margin-bottom: -14px;
+    }
+    .hero-inner { max-width: 720px; margin: 0 auto; }
+    .hero-badge {
+      display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 10px;
+      border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .hero-title { font-size: 20px; font-weight: 800; }
+    .hero-sub { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 0 14px 16px 14px; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px;
+      padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+    .card-title { font-size: 13px; font-weight: 800; color: var(--brand-primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Lista de Productos */
+    .search-box { position: relative; margin-bottom: 12px; }
+    .product-list { max-height: 410px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 2px; }
+    .product-item {
+      background: #F8FAFC; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: 0.15s;
+    }
+    .product-item.selected { background: var(--brand-soft); border-color: var(--brand-primary); }
+    .prod-info { flex: 1; }
+    .prod-name { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; line-height: 1.25; }
+    .prod-meta { font-size: 12px; color: var(--text-muted); }
+    .prod-price { color: var(--brand-primary); font-weight: 800; font-size: 13px; }
+
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-light);
+      background: #FFFFFF; color: var(--text-dark); font-size: 18px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .qty-btn:active { transform: scale(0.95); }
+    .qty-input {
+      width: 58px !important; text-align: center; padding: 8px 4px !important; margin-bottom: 0 !important;
+      font-size: 14px !important; font-weight: 800 !important; background: #FFFFFF !important;
+    }
+
+    /* Barra Flotante Inferior */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #FFFFFF;
+      border-top: 2px solid var(--brand-primary); padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center; z-index: 60;
+      box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.1);
+    }
+    .cart-summary-text { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .cart-total-val { font-size: 20px; font-weight: 900; color: var(--text-dark); }
+
+    /* Modal Resumen */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(2px); z-index: 100;
+      display: none; justify-content: center; align-items: flex-end; padding: 12px;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-sheet {
+      background: #FFFFFF; border-radius: 22px; width: 100%; max-width: 540px;
+      max-height: 90vh; overflow-y: auto; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+    .cart-row {
+      display: flex; justify-content: space-between; align-items: center; padding: 10px 0;
+      border-bottom: 1px solid var(--border-light); font-size: 13px;
+    }
+
+    .hidden { display: none !important; }
+    .loader { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; font-weight: 600; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; background: var(--brand-soft); color: var(--brand-primary); }
+  </style>
+</head>
+<body>
+
+  <!-- VISTA 1: INICIO DE SESIÓN CON PIN -->
+  <div id="vista-login" class="login-wrapper">
+    <div class="login-card">
+      <img src="https://drive.google.com/thumbnail?id=1Dxw9_Vu4zgAZcK8eCdStIi1ETx2IA-JK&sz=w1000" alt="Grupo Kingpin" class="login-logo">
+      <div class="login-title">Órdenes de Compra</div>
+      <div class="login-sub">Selecciona tu nombre e ingresa tu PIN de acceso</div>
+
+      <div id="login-loader" class="loader">Conectando con la base de datos...</div>
+
+      <div id="login-form" class="hidden">
+        <label for="select-usuario">Colaborador / Solicitante</label>
+        <select id="select-usuario"></select>
+
+        <label for="input-pin">PIN de Acceso (4 o 5 dígitos)</label>
+        <input type="password" id="input-pin" class="pin-input" inputmode="numeric" maxlength="5" placeholder="••••">
+
+        <button id="btn-ingresar" class="btn" onclick="intentarLogin()">Ingresar al Sistema</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 2: APLICACIÓN DE ÓRDENES DE COMPRA -->
+  <div id="vista-app" class="hidden">
+    <div class="topbar">
+      <div class="topbar-left">
+        <img id="app-logo" src="" alt="Logo Sucursal" class="topbar-logo">
+        <div class="topbar-info">
+          <h2 id="app-sucursal-titulo">Sucursal</h2>
+          <p id="app-usuario-subtitulo">Usuario</p>
+        </div>
+      </div>
+      <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+    </div>
+
+    <div class="hero-banner">
+      <div class="hero-inner">
+        <span class="hero-badge" id="hero-region-badge">SISTEMA DE COMPRAS</span>
+        <div class="hero-title" id="hero-sucursal-nombre">Nueva Orden de Compra</div>
+        <div class="hero-sub" id="hero-sucursal-dir">Selecciona proveedor e insumos requeridos</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Selector de Sucursal (Visible si tiene acceso a más de 1) -->
+      <div id="bloque-sucursal" class="card hidden">
+        <div class="card-title">1. Sucursal de Entrega</div>
+        <select id="select-sucursal" onchange="cambiarSucursal()" style="margin-bottom:0;"></select>
+      </div>
+
+      <!-- Selección de Proveedor -->
+      <div class="card">
+        <div class="card-title">Seleccionar Proveedor</div>
+        <select id="select-proveedor" onchange="filtrarProductosProveedor()" style="margin-bottom:8px;">
+          <option value="">-- Elige un proveedor --</option>
+        </select>
+        <div id="info-proveedor" style="font-size: 12px; color: var(--text-muted); font-weight: 500;"></div>
+      </div>
+
+      <!-- Catálogo de Insumos -->
+      <div id="bloque-productos" class="card hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="card-title" style="margin:0;">Catálogo de Insumos</div>
+          <span id="contador-productos" class="badge">0 insumos</span>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="input-buscar" placeholder="🔍 Buscar producto por nombre o SKU..." oninput="renderizarListaProductos()">
+        </div>
+
+        <div id="lista-productos" class="product-list"></div>
+      </div>
+    </div>
+
+    <!-- Barra Flotante Inferior -->
+    <div id="barra-carrito" class="bottom-bar hidden">
+      <div>
+        <div class="cart-summary-text"><span id="total-partidas">0</span> productos en el pedido</div>
+        <div class="cart-total-val" id="total-dinero">$0.00</div>
+      </div>
+      <button class="btn" style="width: auto; padding: 13px 22px;" onclick="abrirModalRevision()">Revisar Pedido →</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE REVISIÓN Y ENVÍO -->
+  <div id="modal-pedido" class="modal-backdrop">
+    <div class="modal-sheet">
+      <div id="paso-confirmar">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <h3 style="font-size:19px; font-weight:800;">Confirmar Orden de Compra</h3>
+          <button class="btn-salir" onclick="cerrarModal()">✕ Cerrar</button>
+        </div>
+
+        <div id="resumen-cabecera" style="background:#F8FAFC; border:1px solid var(--border-light); padding:12px; border-radius:12px; font-size:12px; line-height:1.5; margin-bottom:14px;"></div>
+        <div id="lista-carrito-modal" style="max-height:240px; overflow-y:auto; margin-bottom:14px;"></div>
+
+        <label for="input-notas">Observaciones / Horario de entrega (Opcional)</label>
+        <textarea id="input-notas" rows="2" placeholder="Ej. Entregar antes de las 11:00 AM en puerta de servicio..."></textarea>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin: 14px 0; font-size:16px; font-weight:800;">
+          <span>Total Estimado:</span>
+          <span id="modal-total-dinero" style="color:var(--brand-primary); font-size:22px;">$0.00</span>
+        </div>
+
+        <button id="btn-enviar-orden" class="btn" onclick="enviarOrdenDefinitiva()">Generar PDF y Enviar Orden</button>
+      </div>
+
+      <div id="paso-exito" class="hidden" style="text-align:center; padding: 12px 0;">
+        <div style="font-size:48px; margin-bottom:8px;">✅</div>
+        <h3 style="font-size:21px; font-weight:800; margin-bottom:4px;">¡Orden Generada!</h3>
+        <p id="exito-folio" style="color:var(--brand-primary); font-weight:800; font-size:16px; margin-bottom:12px;"></p>
+        <p id="exito-detalle" style="font-size:13px; color:var(--text-muted); margin-bottom:18px; line-height:1.4;"></p>
+
+        <a id="link-whatsapp" href="#" target="_blank" class="btn btn-whatsapp">
+          📲 Enviar por WhatsApp al Proveedor
+        </a>
+
+        <a id="link-pdf" href="#" target="_blank" class="btn btn-drive">
+          📄 Ver PDF en Google Drive
+        </a>
+
+        <button class="btn btn-secondary" style="margin-top:14px;" onclick="nuevaOrden()">Hacer Otra Orden de Compra</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
