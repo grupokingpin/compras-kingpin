@@ -1,6 +1,6 @@
 /**
  * LÓGICA DE FRONTEND - SISTEMA DE ÓRDENES DE COMPRA GRUPO KINGPIN
- * Conectado a Google Apps Script Backend
+ * Con cálculo de impuestos (IVA 0%, 8%, 16%) en tiempo real
  */
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbwVP6KwX9rcAwuw2r5c1X2yYfbswsa1Lt7xepvdZWIBtGPOoMOVgGOi8rWtcsYofjnA/exec';
@@ -12,10 +12,9 @@ let estado = {
   proveedores: [],
   productos: [],
   proveedorActivo: null,
-  carrito: {} // { sku: { sku, descripcion, um, precio, cantidad } }
+  carrito: {} // { sku: { sku, descripcion, um, precio, ivaPct, cantidad } }
 };
 
-// Cargar usuarios al iniciar la pantalla
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const resp = await fetch(`${API_URL}?action=getUsuarios`);
@@ -41,7 +40,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Función auxiliar para peticiones POST a Apps Script
 async function postApi(datos) {
   const response = await fetch(API_URL, {
     method: 'POST',
@@ -114,7 +112,6 @@ async function seleccionarSucursalPorIndice(idx) {
   estado.carrito = {};
   actualizarBarraCarrito();
 
-  // Aplicar paleta visual condicional (Bolerama Coyoacán vs Grupo Kingpin)
   if (suc.id === 'BOL_COY') {
     document.body.classList.add('tema-bolerama');
   } else {
@@ -186,12 +183,13 @@ function renderizarListaProductos() {
 
   filtrados.forEach(prod => {
     const cantActual = estado.carrito[prod.sku] ? estado.carrito[prod.sku].cantidad : 0;
+    const ivaPct = prod.ivaPct || 0;
     const div = document.createElement('div');
     div.className = 'product-item' + (cantActual > 0 ? ' selected' : '');
     div.innerHTML = `
       <div class="prod-info">
         <div class="prod-name">${prod.descripcion}</div>
-        <div class="prod-meta">${prod.sku} • UM: <strong>${prod.um}</strong> • <span class="prod-price">$${prod.precio.toFixed(2)}</span></div>
+        <div class="prod-meta">${prod.sku} • UM: <strong>${prod.um}</strong> • <span class="prod-price">$${prod.precio.toFixed(2)}</span><span class="iva-tag">IVA ${ivaPct}%</span></div>
       </div>
       <div class="qty-controls">
         <button class="qty-btn" onclick="modificarCantidad('${prod.sku}', -1)">−</button>
@@ -229,31 +227,50 @@ function actualizarItemCarrito(prod, cantidad) {
       descripcion: prod.descripcion,
       um: prod.um,
       precio: prod.precio,
+      ivaPct: prod.ivaPct || 0,
       cantidad: cantidad
     };
   }
   actualizarBarraCarrito();
 }
 
-function actualizarBarraCarrito() {
+function calcularTotalesCarrito() {
   const items = Object.values(estado.carrito);
+  let subtotal = 0;
+  let iva = 0;
+
+  items.forEach(i => {
+    const sub = i.cantidad * i.precio;
+    const montoIva = sub * ((i.ivaPct || 0) / 100);
+    subtotal += sub;
+    iva += montoIva;
+  });
+
+  return {
+    items: items,
+    subtotal: subtotal,
+    iva: iva,
+    total: subtotal + iva
+  };
+}
+
+function actualizarBarraCarrito() {
+  const calc = calcularTotalesCarrito();
   const barra = document.getElementById('barra-carrito');
-  if (items.length === 0) {
+  if (calc.items.length === 0) {
     barra.classList.add('hidden');
     return;
   }
 
-  let total = 0;
-  items.forEach(i => total += i.cantidad * i.precio);
-
-  document.getElementById('total-partidas').textContent = items.length;
-  document.getElementById('total-dinero').textContent = '$' + total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('total-partidas').textContent = calc.items.length;
+  document.getElementById('total-dinero').textContent = '$' + calc.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('barra-desglose').textContent = `Sub: $${calc.subtotal.toFixed(2)} • IVA: $${calc.iva.toFixed(2)}`;
   barra.classList.remove('hidden');
 }
 
 function abrirModalRevision() {
-  const items = Object.values(estado.carrito);
-  if (items.length === 0) return;
+  const calc = calcularTotalesCarrito();
+  if (calc.items.length === 0) return;
 
   document.getElementById('paso-confirmar').classList.remove('hidden');
   document.getElementById('paso-exito').classList.add('hidden');
@@ -266,23 +283,24 @@ function abrirModalRevision() {
 
   const listaModal = document.getElementById('lista-carrito-modal');
   listaModal.innerHTML = '';
-  let total = 0;
 
-  items.forEach(item => {
+  calc.items.forEach(item => {
     const sub = item.cantidad * item.precio;
-    total += sub;
+    const ivaPct = item.ivaPct || 0;
     listaModal.innerHTML += `
       <div class="cart-row">
         <div>
           <strong>${item.descripcion}</strong><br>
-          <span style="color:var(--text-muted); font-size:11px;">${item.cantidad} ${item.um} × $${item.precio.toFixed(2)}</span>
+          <span style="color:var(--text-muted); font-size:11px;">${item.cantidad} ${item.um} × $${item.precio.toFixed(2)} (IVA ${ivaPct}%)</span>
         </div>
         <div style="font-weight:800;">$${sub.toFixed(2)}</div>
       </div>
     `;
   });
 
-  document.getElementById('modal-total-dinero').textContent = '$' + total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('modal-subtotal').textContent = '$' + calc.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('modal-iva').textContent = '$' + calc.iva.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('modal-total-dinero').textContent = '$' + calc.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   document.getElementById('modal-pedido').classList.add('active');
 }
 
@@ -321,7 +339,7 @@ async function enviarOrdenDefinitiva() {
 
     document.getElementById('exito-folio').textContent = `Folio: ${res.folio}`;
     document.getElementById('exito-detalle').textContent = res.correoEnviado
-      ? 'El PDF se guardó en Google Drive y se envió automáticamente por correo electrónico al proveedor.'
+      ? 'El PDF con desglose de impuestos se guardó en Google Drive y se envió por correo al proveedor.'
       : 'El PDF se guardó en Google Drive (el proveedor no tiene correo registrado, envíalo por WhatsApp).';
 
     document.getElementById('link-whatsapp').href = res.whatsappUrl;
